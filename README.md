@@ -1,4 +1,4 @@
-# Omniauth::Openstack::Identity
+# Omniauth::OpenstackIdentity
 
 TODO: Write a gem description
 

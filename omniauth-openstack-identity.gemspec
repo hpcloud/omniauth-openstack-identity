@@ -1,23 +1,30 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'omniauth/openstack/identity/version'
+require 'omniauth-openstack-identity/version'
 
-Gem::Specification.new do |spec|
-  spec.name          = "omniauth-openstack-identity"
-  spec.version       = Omniauth::Openstack::Identity::VERSION
-  spec.authors       = ["Chris Johnson"]
-  spec.email         = ["wchrisjohnson@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
-  spec.license       = "MIT"
+Gem::Specification.new do |s|
+  s.name          = "omniauth-openstack-identity"
+  s.version       = Omniauth::OpenstackIdentity::VERSION
+  s.authors       = ["Chris Johnson"]
+  s.email         = ["wchrisjohnson@gmail.com"]
+  s.summary       = %q{OmniAuth strategy for Openstack Identity (keystone).}
+  s.description   = %q{OmniAuth strategy for Openstack Identity (keystone).}
+  s.homepage      = "https://github.com/wchrisjohnson/omniauth-openstack-identity"
+  s.license       = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0")
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  spec.require_paths = ["lib"]
+  s.files         = `git ls-files -z`.split("\x0")
+  s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  s.test_files    = s.files.grep(%r{^(test|spec|features)/})
+  s.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.6"
-  spec.add_development_dependency "rake"
+  s.add_dependency 'omniauth', '~> 1.0'
+  s.add_dependency 'faraday'
+  s.add_dependency 'faraday_middleware'
+  s.add_development_dependency 'rspec', '~> 2.7'
+  s.add_development_dependency 'rack-test'
+  s.add_development_dependency 'simplecov'
+  s.add_development_dependency 'webmock'
+  s.add_development_dependency "bundler", "~> 1.6"
+  s.add_development_dependency "rake"
 end
