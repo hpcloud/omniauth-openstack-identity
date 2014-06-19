@@ -4,6 +4,7 @@ require 'faraday_middleware'
 class KeystoneV2
 
   def initialize(options={})
+
     @url = options['url']
     @username = options['username']
     @password = options['password']
@@ -17,22 +18,28 @@ class KeystoneV2
       faraday.response :raise_error
       faraday.response :json, :content_type => "application/json"
       faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
-    end # new
-  end # initialize
+    end
+  end
 
   def authenticate
     resp = @conn.post 'tokens' do |request|
-      request.body = {
-         "auth" => {
-            "tenantName" => "#{@tenant_name}",
-            "passwordCredentials" => {
-               "username" => "#{@username}",
-               "password" => "#{@password}"
-            }
-         }
-      }
-    end # post
+      request.body = auth_hash
+    end
     resp.body
-  end # authenticate
+  end
 
-end # class
+  private
+
+  def auth_hash
+    {
+       "auth" => {
+          "tenantName" => "#{@tenant_name}",
+          "passwordCredentials" => {
+             "username" => "#{@username}",
+             "password" => "#{@password}"
+          }
+       }
+    }
+  end
+
+end

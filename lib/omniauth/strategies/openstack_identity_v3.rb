@@ -7,56 +7,44 @@ module OmniAuth
 
       include OmniAuth::Strategy
 
-      # endpoint ex: http://192.168.27.100:5000/v3
+      # endpoint ex: http://10.10.10.10:5000/v3
       args [:endpoint]
 
       option :fields, [:username, :password, :domain_name, :project_name]
       option :uid_field, :username
 
-      def setup
-        puts "Entering SETUP phase"
-      end
-
       def request_phase
-        puts "Entering REQUEST phase"
-
         OmniAuth::Form.build(:title => options.title, :url => callback_path) do
           text_field 'Username', 'username'
           password_field 'Password', 'password'
           text_field 'Domain Name', 'domain_name'
           text_field 'Project Name', 'project_name'
         end.to_response
-
       end
 
-      # def authorize_params
-      #   puts "Entering AUTHORIZE phase"
-      #   puts request.params
-      # end
+      uid do
+        request.params[options.uid_field.to_s]
+      end
 
-      # uid do
-      #   request.params[options.uid_field.to_s]
-      # end
-      #
-      # info do
-      #   options.fields.inject({}) do |hash, field|
-      #     hash[field] = request.params[field.to_s]
-      #     hash
-      #   end
-      # end
+      info do
+        options.fields.inject({}) do |hash, field|
+          hash[field] = request.params[field.to_s]
+          hash
+        end
+      end
+
+      credentials do
+        {'token' => username, 'secret' => password}
+      end
+
+      extra do
+        {'raw_info' => @authentication_response}
+      end
 
       def callback_phase
-        puts "Entering CALLBACK phase"
-
-        puts " "
-        puts "RESPONSE:"
-        puts authentication_response.to_yaml
-        puts " "
-
-        return fail!(:invalid_credentials) if !authentication_response
+        return fail!(:invalid_credentials) unless authentication_response
         # return fail!(:invalid_credentials) if authentication_response.code.to_i >= 400
         super
-
       end
 
 
