@@ -1,4 +1,4 @@
-# Omniauth::OpenstackIdentity
+# OpenstackIdentity
 
 This gem provides a really simple way to authenticate against the OpenStack
 Identity service using OmniAuth.
