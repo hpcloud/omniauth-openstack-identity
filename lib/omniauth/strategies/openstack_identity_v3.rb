@@ -12,6 +12,7 @@ module OmniAuth
 
       option :fields, [:username, :password, :domain_name, :project_name]
       option :uid_field, :username
+      
 
       def request_phase
         OmniAuth::Form.build(:title => options.title, :url => callback_path) do
@@ -21,6 +22,13 @@ module OmniAuth
           text_field 'Project Name', 'project_name'
         end.to_response
       end
+
+      def callback_phase
+        return fail!(:invalid_credentials) unless authentication_response
+        # return fail!(:invalid_credentials) if authentication_response.code.to_i >= 400
+        super
+      end
+
 
       uid do
         request.params[options.uid_field.to_s]
@@ -40,13 +48,6 @@ module OmniAuth
       extra do
         {'raw_info' => @authentication_response}
       end
-
-      def callback_phase
-        return fail!(:invalid_credentials) unless authentication_response
-        # return fail!(:invalid_credentials) if authentication_response.code.to_i >= 400
-        super
-      end
-
 
 
       protected
