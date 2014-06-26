@@ -1,5 +1,5 @@
 require 'omniauth'
-require 'keystone_v2'
+require 'keystone/keystone_v2'
 
 module OmniAuth
   module Strategies
@@ -10,8 +10,10 @@ module OmniAuth
       # endpoint ex: http://10.10.10.10:5000/v2.0
       args [:endpoint]
 
-      option :fields, [:username, :password, :tenant_name]
+      option :fields, [:username, :password]
       option :uid_field, :username
+
+      attr_reader :auth_token
 
 
       def request_phase
@@ -23,8 +25,9 @@ module OmniAuth
       end
 
       def callback_phase
-        return fail!(:invalid_credentials) unless authentication_response
-        # return fail!(:invalid_credentials) if authentication_response.code.to_i >= 400
+        perform_authenticate
+        return fail!(:invalid_credentials) unless @authentication_response
+        return fail!(:invalid_credentials) if @authentication_response.status.to_i >= 400
         super
       end
 
@@ -41,7 +44,7 @@ module OmniAuth
       end
 
       credentials do
-        {'token' => username, 'secret' => password}
+        {'token' => @auth_token, 'username' => username, 'secret' => password}
       end
 
       extra do
@@ -65,21 +68,17 @@ module OmniAuth
         request['password']
       end
 
-      def tenant_name
-        request['tenant_name']
-      end
-
-      def authentication_response
+      def perform_authenticate
         unless @authentication_response
-          return unless username && password && tenant_name
+          return unless username && password
 
-          ks = KeystoneV2.new({
+          ks = ::Keystone::KeystoneV2.new({
             'url'=>"#{api_uri}",
             'username'=>"#{username}",
-            'password'=>"#{password}",
-            'tenant_name'=>"#{tenant_name}"})
+            'password'=>"#{password}"})
 
           @authentication_response = ks.authenticate
+          @auth_token = extract_auth_token(@authentication_response)
         end
 
         @authentication_response
@@ -88,8 +87,8 @@ module OmniAuth
       private
 
       def get_credentials
+        options.title = "Keystone v2 auth: username+password"
         OmniAuth::Form.build(:title => options.title, :url => callback_path) do
-          text_field 'Tenant Name', 'tenant_name'
           text_field 'Username', 'username'
           password_field 'Password', 'password'
         end.to_response
@@ -101,6 +100,11 @@ module OmniAuth
         fail!(:timeout, e)
       rescue ::Net::HTTPFatalError => e
         fail!(:service_unavailable, e)
+      end
+
+      def extract_auth_token(faraday_response)
+        body = faraday_response.body
+        body['access']['token']['id']
       end
     end
   end
