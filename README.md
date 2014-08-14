@@ -3,6 +3,9 @@
 This gem provides a really simple way to authenticate against the OpenStack
 Identity service using OmniAuth.
 
+It should be considered alpha quality at this point, with little to no tests in
+place.
+
 
 ## Installation
 
